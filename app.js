@@ -6,13 +6,20 @@ const booksRoutes = require('./routes/books');
 const userRoutes = require('./routes/user');
 
 
-mongoose.connect(process.env.ConnexionStringMongoDB,
-  {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-  })
-  .then(() => console.log('Connexion à MongoDB réussie !'))
-  .catch(() => console.log('Connexion à MongoDB échouée !'));
+//
+try {
+  //
+  mongoose.connect(process.env.ConnexionStringMongoDB,
+    {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    })
+  //
+  console.log('Connexion à MongoDB réussie !')
+} catch (error) {
+  //
+  console.log('Connexion à MongoDB échouée !')
+}
 
 
 app.use(express.json());
@@ -24,6 +31,7 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use("/images", express.static("images"));
 
 app.use('/api/books', booksRoutes);
 app.use('/api/auth', userRoutes);
