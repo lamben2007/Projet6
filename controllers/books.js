@@ -2,6 +2,51 @@ const Book = require('../models/book');
 const fs = require('fs');
 
 
+// Notation d'un livre
+exports.ratingBook = async (req, res, next) => {
+
+    try {
+
+        console.log("body:", req.body);
+
+        // Vérifier note comprise entre 0 et 5
+        if (req.body.rating < 0 || req.body.rating > 5)
+            //
+            res.status(401).json({ message: 'Error rating' });
+        //
+        else {
+
+            // Rechercher les informations du livre en fonction de son ID
+            const book = await Book.findOne({ _id: req.params.id })
+
+            // Vérifier si la note déjà attribuée par l'utilisateur
+            const filteredRatings = book.ratings.filter(rating => rating.userId === req.body.userId);
+            if (filteredRatings.length > 0) {
+                //
+                res.status(401).json({ message: 'Book rating already made by the user' });
+            }
+            //
+            else {
+
+                // Ajouter la nouvelle note
+                book.ratings.push({ "userId": req.body.userId, "grade": req.body.rating });
+
+                // Sauvegarder les modifications
+                await book.save();
+
+                //
+                res.status(201).json(book);
+            }
+        }
+
+    }
+
+    catch (error) {
+        res.status(400).json({ error });
+    }
+
+}
+
 // Création d'un livre
 exports.createBook = (req, res) => {
     //
