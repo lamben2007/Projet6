@@ -2,12 +2,31 @@ const Book = require('../models/book');
 const fs = require('fs');
 
 
+// Les 3 meilleurs livres
+exports.getBestRating = async (req, res, next) => {
+    try {
+        const topBooks = await Book.find()
+            .sort({ averageRating: -1 })
+            .limit(3); // remettre à 3
+
+        console.log('Top 3 documents :', topBooks);
+
+        //
+        res.status(201).json(topBooks);
+
+    } catch (error) {
+        //
+        res.status(400).json({ error });
+    }
+
+}
+
 // Notation d'un livre
 exports.ratingBook = async (req, res, next) => {
 
     try {
 
-        console.log("body:", req.body);
+        // console.log("body:", req.body);
 
         // Vérifier note comprise entre 0 et 5
         if (req.body.rating < 0 || req.body.rating > 5)
@@ -25,16 +44,22 @@ exports.ratingBook = async (req, res, next) => {
                 //
                 res.status(401).json({ message: 'Book rating already made by the user' });
             }
-            //
+            // SINON (note non attribuée par l'utilisateur)
             else {
 
                 // Ajouter la nouvelle note
                 book.ratings.push({ "userId": req.body.userId, "grade": req.body.rating });
 
+                // Recalculer la moyenne
+                const total = book.ratings.reduce((sum, rating) => sum + rating.grade, 0);
+                // book.averageRating = total / book.ratings.length;
+                book.averageRating = Math.round(total / book.ratings.length); // arrondir à l'entier le plus proche
+                // console.log("note moyenne:", book.averageRating);
+
                 // Sauvegarder les modifications
                 await book.save();
 
-                //
+                // Renvoyer les infos du livre
                 res.status(201).json(book);
             }
         }
