@@ -6,53 +6,69 @@ const fs = require('fs');
 // Configuration de multer pour stocker les fichiers en mémoire
 const storage = multer.memoryStorage();
 
-//
+/**
+ * @function upload
+ * @description Middleware de gestion de l'upload d'image avec Multer.
+ */
 const upload = multer({
-    storage: storage,
-    limits: { fileSize: 5 * 1024 * 1024 }, // Limite de 5 Mo
+    storage: storage, // Définit l'endroit et la manière dont les fichiers seront stockés
+    limits: { fileSize: 1 * 1024 * 1024 }, // Limite la taille du fichier à 1 Mo (1 * 1024 * 1024 octets)
     fileFilter: (req, file, cb) => {
-        if (!file.mimetype.startsWith('image/')) {
-            return cb(new Error('Seuls les fichiers image sont autorisés !'), false);
+        if (!file.mimetype.startsWith('image/')) { // Vérifie si le fichier est une image en analysant son type MIME
+            return cb(new Error('Seuls les fichiers image sont autorisés !'), false); // Rejette le fichier s'il ne s'agit pas d'une image
         }
-        cb(null, true);
+        cb(null, true); // Accepte le fichier si c'est une image
     }
-}).single('image'); // 'image' est le champ attendu dans la requête
+}).single('image'); // Accepte un seul fichier avec le champ 'image' dans la requête
 
 
-//
+/**
+ * @function processImage
+ * @description Middleware pour traiter une image uploadée
+ * @param {Object} req - Objet de requête Express contenant le fichier uploadé
+ * @param {Object} res - Objet de réponse Express pour renvoyer une erreur en cas d'échec
+ * @param {Function} next - Fonction middleware suivante à appeler
+ * @returns {void} - Passe au middleware suivant ou renvoie une erreur
+ */
 const processImage = async (req, res, next) => {
+
+    // SI fichier image non spécifié
     if (!req.file) {
-        // return res.status(400).json({ error: 'Aucun fichier téléchargé' });
-        // console.log("Aucun fichier téléchargé'");
-        next(); // BLA : est-ce correct ?
-        return; // BLA : est-ce correct ?
+        next(); // Aller à la fonction middleware suivante
     }
+    // SINON (si fichier spécifié)
+    else {
 
-    try {
-        const filename = `image-${Date.now()}.webp`;
-        const outputPath = path.join('images', filename);
+        try {
+            // Définition du fichier image avec son chemin
+            const filename = `image-${Date.now()}.webp`;
+            const outputPath = path.join('images', filename);
 
-        // Vérifier que le dossier existe
-        if (!fs.existsSync(path.join('images'))) {
-            fs.mkdirSync(path.join('images'), { recursive: true });
-            // console.log("répertoire image a été créé");
+            // Créer le dossier "images" s'il n'existe pas
+            if (!fs.existsSync(path.join('images'))) {
+                fs.mkdirSync(path.join('images'), { recursive: true });
+            }
+
+            // Traitement de l'image avec Sharp
+            await sharp(req.file.buffer)
+                .webp({ quality: 80 })
+                .resize(450) // Redimensionne à la largeur à 450px
+                .toFormat('webp') // Convertit en WebP
+                .toFile(outputPath); // Définition fichier image
+
+            // Définition du fichier image (avec et sans chemin)
+            req.file.filename = filename;
+            req.file.path = outputPath;
+
+            // Aller à la fonction middleware suivante
+            next();
         }
-        // else
-        //     console.log("répertoire image existe");
+        // Gestion des erreurs
+        catch (error) {
+            // Renvoie une erreur 500 'Erreur lors du traitement de l'image
+            return res.status(500).json({ error: 'Erreur lors du traitement de l\'image' });
+        }
 
-        // Traitement avec Sharp
-        await sharp(req.file.buffer)
-            // .webp({ quality: 20 })
-            // .resize(800, 600, { fit: 'inside' }) // Redimensionne à 800x600 max
-            .toFormat('webp') // Convertit en WebP
-            .toFile(outputPath);
-
-        req.file.filename = filename;
-        req.file.path = outputPath;
-
-        next();
-    } catch (error) {
-        return res.status(500).json({ error: 'Erreur lors du traitement de l\'image' });
     }
 };
 
