@@ -5,7 +5,7 @@ const globalLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 100, // Limite chaque IP à 100 requêtes
     message: "Trop de requêtes effectuées depuis cette IP, veuillez réessayer plus tard.",
-    headers: true, // Ajoute des en-têtes RateLimit dans la réponse. BLA : Faut-il activer cette option ?
+    headers: false, // Retire les en-têtes RateLimit dans la réponse. 
 });
 
 

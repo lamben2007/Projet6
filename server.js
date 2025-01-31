@@ -28,8 +28,8 @@ const normalizePort = val => {
 };
 
 
-// Récupération du port à utiliser, avec un port 4000 si non défini
-const port = normalizePort(process.env.PORT || '4000');
+// Récupération du port à utiliser
+const port = normalizePort(process.env.PORT );
 app.set('port', port);  // Définir le port sur l'application
 
 

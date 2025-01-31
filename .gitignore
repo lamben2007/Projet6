@@ -1,3 +1,3 @@
 node_modules
 .env
-images/*.*
+images/*.* #Désactivée pour les tests de l'API avec les images via code source GitHub mais à réactiver en production !! 

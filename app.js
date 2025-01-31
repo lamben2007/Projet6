@@ -37,7 +37,7 @@ app.use(helmet({
 
 
 // Middleware de limitation de la fréquence des requêtes (globalLimiter)
-app.use(globalLimiter);
+app.use(globalLimiter); 
 
 
 // Middleware pour définir des en-têtes HTTP spécifiques pour gérer les CORS (Cross-Origin Resource Sharing)

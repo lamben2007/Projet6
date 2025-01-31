@@ -13,13 +13,12 @@ const validateSignup = [
     body('email')
         .isEmail().withMessage('Email invalide') // Vérifie si l'email est valide
         .normalizeEmail() // Normalise l'email (suppression des espaces, mise en minuscule, etc.)
-        .isLength({ max: 255 }).withMessage('Email trop long'), // Vérifie la longueur max
+        .isLength({ max: 255 }).withMessage('Votre email doit contenir au maximum 255 caractères '), // Vérifie la longueur max
 
     // Validation du mot de passe
     body('password')
-        .isLength({ min: 8 }).withMessage('Mot de passe invalide') // Vérifie la longueur min
-        .matches(/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[\W]).+$/) // Vérifie le format email
-        .withMessage('Mot de passe invalide')
+        .matches(/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[\W]).+$/)
+        .withMessage('Votre mot de passe dont contenir au moins une majuscule, une minuscule, un chiffre et un caractère spécial')
         .isLength({ min: 8, max: 64 }).withMessage('Le mot de passe doit contenir entre 8 et 64 caractères'),
 
     // Middleware pour gérer les erreurs de validation
